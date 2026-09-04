@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: observability-system
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/observability
+    username: postgres
+    password: admin1
+
+  jpa:
+    hibernate:
+      ddl-auto: update
