@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#060810" />
+    <meta name="description" content="Signalwatch — Real-time Kafka observability and event pipeline monitoring." />
+    <title>Signalwatch — Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+
+      <!-- ── Sidebar Rail ─────────────────────────────────── -->
+      <aside class="rail" aria-label="Navigation">
+        <a class="wordmark" href="#top" aria-label="Signalwatch home">
+          <span class="mark"><i></i><i></i><i></i></span>
+          <span>signal<span>watch</span></span>
+        </a>
+
+        <div class="rail-rule"></div>
+        <p class="rail-label">Monitor</p>
+
+        <nav class="nav" aria-label="Main navigation">
+          <a class="nav-link active" href="#top" id="nav-overview">
+            <span class="nav-glyph">◈</span>
+            Overview
+          </a>
+          <a class="nav-link" href="#services" id="nav-services">
+            <span class="nav-glyph">⌘</span>
+            Services
+          </a>
+          <a class="nav-link" href="#activity" id="nav-activity">
+            <span class="nav-glyph">↯</span>
+            Activity
+            <em id="navAlertCount">0</em>
+          </a>
+        </nav>
+
+        <div class="rail-footer">
+          <div class="stream-state" role="status" aria-live="polite">
+            <span class="state-light connecting" id="sidebarLight" aria-hidden="true"></span>
+            <div>
+              <p>Event Stream</p>
+              <strong id="sidebarStatus">Connecting</strong>
+            </div>
+          </div>
+          <p class="build">LOCAL / v1.0</p>
+        </div>
+      </aside>
+
+      <!-- ── Main Content ─────────────────────────────────── -->
+      <main class="content" id="top">
+
+        <!-- Header -->
+        <header class="header">
+          <div>
+            <p class="kicker">Thursday · 04 Sep 2026 <span>/</span> Platform Operations</p>
+            <h1>System pulse<span class="period">.</span></h1>
+            <p class="lede">Your event pipeline, at a glance.</p>
+          </div>
+          <div class="header-tools">
+            <div class="connection" role="status" aria-live="polite">
+              <span id="connectionDot" class="state-light connecting" aria-hidden="true"></span>
+              <span id="connectionLabel">Connecting</span>
+            </div>
+            <button id="refreshButton" class="refresh" aria-label="Reconnect event stream" title="Reconnect">↻</button>
+          </div>
+        </header>
+
+        <!-- Hero Metrics -->
+        <section class="hero-metrics" aria-label="Key metrics" id="overview-metrics">
+          <article class="metric metric-primary">
+            <p class="metric-label">Events Processed</p>
+            <div class="metric-value" id="totalLogs">—</div>
+            <p class="metric-foot"><span class="trend">↗</span> Since pipeline started</p>
+          </article>
+          <article class="metric">
+            <p class="metric-label">Throughput</p>
+            <div class="metric-value" id="eventsPerSecond">—</div>
+            <p class="metric-foot">events / second</p>
+          </article>
+          <article class="metric">
+            <p class="metric-label">Error Rate</p>
+            <div class="metric-value" id="errorRate">—</div>
+            <p class="metric-foot"><span id="errorCount">0</span> error events</p>
+          </article>
+          <article class="metric">
+            <p class="metric-label">Active Services</p>
+            <div class="metric-value" id="serviceCount">—</div>
+            <p class="metric-foot">reporting to Kafka</p>
+          </article>
+        </section>
+
+        <!-- Main Grid: Chart + Service Pulse -->
+        <section class="main-grid">
+          <article class="surface chart-surface">
+            <div class="surface-head">
+              <div>
+                <p class="section-index">01 / Pipeline</p>
+                <h2>Event flow</h2>
+              </div>
+              <div class="live-label">
+                <span class="live-dot"></span>
+                Live
+              </div>
+            </div>
+            <div class="chart-meta">
+              <span>Events over time</span>
+              <span class="chart-range">Last 30 snapshots</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="volumeChart" aria-label="Event flow chart"></canvas>
+              <div class="chart-empty" id="chartEmpty">Waiting for telemetry…</div>
+            </div>
+            <div class="chart-legend">
+              <button class="legend-btn active" data-mode="total" title="Click to toggle total events line">
+                <i class="legend-swatch events"></i>Total events
+              </button>
+              <button class="legend-btn active" data-mode="errors" title="Click to toggle error events line">
+                <i class="legend-swatch errors"></i>Errors
+              </button>
+              <span class="chart-note" id="lastUpdated">Waiting for data</span>
+            </div>
+          </article>
+
+          <article class="surface services-surface" id="services" tabindex="-1">
+            <div class="surface-head">
+              <div>
+                <p class="section-index">02 / Sources</p>
+                <h2>Service pulse</h2>
+              </div>
+              <span class="quiet-mark" aria-hidden="true">↗</span>
+            </div>
+            <p class="surface-subtitle">Event share by producer</p>
+            <div id="serviceList" class="service-list" role="list">
+              <div class="empty-state">
+                <span aria-hidden="true">◌</span>
+                <p>Listening for services</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Lower Grid: Alerts + Severity -->
+        <section class="lower-grid">
+          <article class="surface activity-surface" id="activity" tabindex="-1">
+            <div class="surface-head">
+              <div>
+                <p class="section-index">03 / Signals</p>
+                <h2>Recent alerts</h2>
+              </div>
+              <button class="clear-button" id="clearButton" aria-label="Clear all alerts">Clear All</button>
+            </div>
+            <div id="activityList" class="activity-list" role="log" aria-live="polite">
+              <div class="empty-state">
+                <span aria-hidden="true">✓</span>
+                <p>All quiet for now</p>
+                <small>Error signals will appear here.</small>
+              </div>
+            </div>
+          </article>
+
+          <article class="surface breakdown-surface">
+            <div class="surface-head">
+              <div>
+                <p class="section-index">04 / Distribution</p>
+                <h2>Severity mix</h2>
+              </div>
+            </div>
+            <div class="breakdown">
+              <div class="donut" id="donut" role="img" aria-label="Severity distribution donut chart">
+                <div>
+                  <strong id="totalSmall">—</strong>
+                  <small>Total</small>
+                </div>
+              </div>
+              <div class="breakdown-legend">
+                <div>
+                  <span class="severity-dot info" aria-hidden="true"></span>
+                  <span>Info</span>
+                  <strong id="infoLogs">—</strong>
+                </div>
+                <div>
+                  <span class="severity-dot warn" aria-hidden="true"></span>
+                  <span>Warning</span>
+                  <strong id="warnLogs">—</strong>
+                </div>
+                <div>
+                  <span class="severity-dot error" aria-hidden="true"></span>
+                  <span>Error</span>
+                  <strong id="errorLogs">—</strong>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <footer>
+          <span>Signalwatch <b>•</b> Kafka Observability</span>
+          <span>Stream <code>/api/events</code></span>
+        </footer>
+      </main>
+    </div>
+
+    <!-- ── Alert Detail Drawer ──────────────────────────────── -->
+    <div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"></div>
+    <aside class="drawer" id="alertDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+      <div class="drawer-header">
+        <div class="drawer-badge">
+          <span class="severity-dot error" aria-hidden="true"></span>
+          <span id="drawerSeverity">ERROR</span>
+        </div>
+        <button class="drawer-close" id="drawerClose" aria-label="Close detail panel">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <h2 class="drawer-service" id="drawerTitle">—</h2>
+        <p class="drawer-message" id="drawerMessage">—</p>
+
+        <div class="drawer-divider"></div>
+
+        <dl class="drawer-meta">
+          <div class="drawer-meta-row">
+            <dt>Event ID</dt>
+            <dd id="drawerEventId" class="mono">—</dd>
+          </div>
+          <div class="drawer-meta-row">
+            <dt>Timestamp</dt>
+            <dd id="drawerTimestamp" class="mono">—</dd>
+          </div>
+          <div class="drawer-meta-row">
+            <dt>Kafka Topic</dt>
+            <dd id="drawerTopic" class="mono">—</dd>
+          </div>
+          <div class="drawer-meta-row">
+            <dt>Partition</dt>
+            <dd id="drawerPartition" class="mono">—</dd>
+          </div>
+          <div class="drawer-meta-row">
+            <dt>Offset</dt>
+            <dd id="drawerOffset" class="mono">—</dd>
+          </div>
+        </dl>
+
+        <div class="drawer-divider"></div>
+
+        <p class="drawer-section-label">Payload</p>
+        <pre class="drawer-payload" id="drawerPayload">—</pre>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="drawer-action-btn dismiss" id="drawerDismiss">Dismiss Alert</button>
+      </div>
+    </aside>
+
+    <script src="app.js"></script>
+  </body>
+</html>
